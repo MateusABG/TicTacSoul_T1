@@ -37,16 +37,23 @@ func _ready():
 			nodos_tabuleiro[line].append(node); 
 	# Novo jogo
 	reset_game();
-	
+var rng= RandomNumberGenerator.new()  
 # Reinicia o jogo
 func reset_game():
-	jogador_atual = 1;
+	jogador_atual = rng.randi_range(1,2);
 	game_ended = false;
 	for linha in range(linhas_tabuleiro):
 		for coluna in range(colunas_tabuleiro):
 			nodos_tabuleiro[linha][coluna].set_player(0);
 			nodos_locais[linha][coluna]=0
 	nodos_locais=clear()
+	if(Dificuldade.get_difficulty() != Dificuldade.MULTIPLAYER and jogador_atual == cpu and empty_cells(nodos_locais).size()==(linhas_tabuleiro*colunas_tabuleiro)):
+		yield(get_tree().create_timer(1),"timeout")
+		$thinking.play()     
+		yield(get_tree().create_timer(1),"timeout")
+		$thinking.stop()
+		var movimento=$AIMANAGER.easy_level() 
+		node_clicked(movimento.x,movimento.y)
 	
 # Chamado pelo BoardPiece quando a posição é clicada
 func node_clicked(linha, coluna):	 
@@ -92,7 +99,8 @@ func make_move(line, column, player):
 		var movimento
 		
 		#Se ainda houver espaços livres nos nodos locais/tabuleiro de nodos, continar jogando
-		if(empty_cells(nodos_locais).size()!=0): 
+		if(empty_cells(nodos_locais).size()!=0):  
+				
 			#Tocar o som de pensamento do player a fim de simular que a maquina está pensando 
 			#Somente toca som de pensamento quando o modo for single player
 			if(Dificuldade.get_difficulty() != Dificuldade.MULTIPLAYER):   
@@ -104,6 +112,8 @@ func make_move(line, column, player):
 				#Se facil, usa o metodo aleatorio
 				#Se dificil, usa o minimax
 				#Se medio usa o método semi-minimax.
+			 
+ 
 			if(Dificuldade.get_difficulty()==Dificuldade.EASY): 
 				movimento=$AIMANAGER.easy_level() 
 				node_clicked(movimento.x,movimento.y)
