@@ -40,19 +40,27 @@ func _ready():
 var rng= RandomNumberGenerator.new()  
 # Reinicia o jogo
 func reset_game():
-	jogador_atual = rng.randi_range(1,2);
+	rng.randomize()
+	#Caso o jogo seja single player, selecionar de forma aleatória quem começa, assim, podendo tanto começar 
+	#a IA como o Player
+	if(Dificuldade.get_difficulty()!= Dificuldade.MULTIPLAYER):
+		jogador_atual = rng.randi_range(1,2);
+	else:
+		jogador_atual=1
 	game_ended = false;
 	for linha in range(linhas_tabuleiro):
 		for coluna in range(colunas_tabuleiro):
 			nodos_tabuleiro[linha][coluna].set_player(0);
 			nodos_locais[linha][coluna]=0
 	nodos_locais=clear()
+	#Caso o jogador atual for a IA, o jogador estiver jogando no modo single player 
+	#e nenhum nodo foi preenchido ainda, executo o metodo aleatorio para gerar o primeiro movimento
 	if(Dificuldade.get_difficulty() != Dificuldade.MULTIPLAYER and jogador_atual == cpu and empty_cells(nodos_locais).size()==(linhas_tabuleiro*colunas_tabuleiro)):
 		yield(get_tree().create_timer(1),"timeout")
 		$thinking.play()     
 		yield(get_tree().create_timer(1),"timeout")
 		$thinking.stop()
-		var movimento=$AIMANAGER.easy_level() 
+		var movimento=$AIMANAGER.easy_level(); 
 		node_clicked(movimento.x,movimento.y)
 	
 # Chamado pelo BoardPiece quando a posição é clicada
